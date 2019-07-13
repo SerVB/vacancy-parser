@@ -1,1 +1,6 @@
 Scrapy
+sqlalchemy
+numpy
+pandas
+pyodbc
+image

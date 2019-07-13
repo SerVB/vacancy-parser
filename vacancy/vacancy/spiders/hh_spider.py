@@ -26,25 +26,6 @@ def clean_up_place(s: Optional[str]) -> Optional[str]:
 
 
 RUSSIA_WITH_SALARY = "https://hh.ru/search/vacancy?area=113&clusters=true&enable_snippets=true&only_with_salary=true"
-# WITH_SALARY = "https://hh.ru/search/vacancy?clusters=true&enable_snippets=true&only_with_salary=true&from=cluster_compensation"
-# SITE = "https://hh.ru/search/vacancy?clusters=true&employment={empl}&enable_snippets=true&industry={ind}&only_with_salary=true&specialization={spec}&from=cluster_professionalArea"
-#
-# divided_start_urls = list()
-#
-# ind_range = range(0, 100)
-# spec_range = range(0, 100)
-# employment = frozenset({
-#     "volunteer",
-#     "full",
-#     "part",
-#     "project",
-#     "probation",
-# })
-#
-# for ind in ind_range:
-#     for spec in spec_range:
-#         for empl in employment:
-#             divided_start_urls.append(SITE.format(ind=ind, spec=spec, empl=empl))
 
 
 class MyJsonItemExporter(JsonItemExporter):
@@ -60,7 +41,8 @@ class HhSpider(Spider):
     start_urls = [RUSSIA_WITH_SALARY]
     custom_settings = {
         # "DEPTH_LIMIT": 5,
-        "FEED_EXPORTERS": {"json": "vacancy.spiders.hh_spider.MyJsonItemExporter"}
+        "FEED_EXPORTERS": {"json": "vacancy.spiders.hh_spider.MyJsonItemExporter"},
+        "ITEM_PIPELINES": {'vacancy.pipelines.DbPipeline': 300},
     }
 
     scraped_pages = set()

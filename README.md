@@ -4,5 +4,7 @@ Python 3.
 
 Запуск:
 ```
-crawl hh -o hh.json
+crawl hh
 ```
+
+Неообходимо положить файл `connection_str.txt` с данными для логина в БД в папку `vacancy`.
