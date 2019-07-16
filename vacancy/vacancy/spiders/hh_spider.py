@@ -109,8 +109,8 @@ class HhSpider(Spider):
             yield response.follow(a, callback=self.parse_vacancy_page)
 
     def parse_vacancy(self, response: Response) -> None:
-        description = clean_up_text("\n".join(response.css(".vacancy-section::text, "
-                                                           ".vacancy-section *::text").extract()))
+        description = clean_up_text("\n".join(response.css(".vacancy-section")[0]
+                                              .css("*:not(style):not(script)::text").extract()))
 
         yield {
             "title": clean_up_text(response.css("h1.header::text").get()),
