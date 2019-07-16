@@ -1,10 +1,10 @@
 # vacancy-parser
 
-Python 3.
+Python 3 + scrapy + другие либы из requirements.txt.
 
-Запуск:
+Запуск (рабочая папка = `./vacancy/`):
 ```
-crawl hh
+crawl hh [-o hh.json] [-L INFO]
 ```
 
-Неообходимо положить файл `connection_str.txt` с данными для логина в БД в папку `vacancy`.
+Необходимо положить файл `connection_str.txt` с данными для логина в БД в папку `./vacancy/`.
