@@ -45,8 +45,6 @@ class HhSpider(Spider):
         # "ITEM_PIPELINES": {'vacancy.pipelines.DbPipeline': 300},
     }
 
-    scraped_pages = set()
-
     @staticmethod
     def vacancy_count(response: Response) -> int:
         vacancy_count_str = response.css(".header.HH-SearchVacancyDropClusters-Header::text").get()
