@@ -9,7 +9,6 @@ import logging
 from time import gmtime, strftime
 from urllib import parse
 
-import numpy as np
 import pandas as pd
 from sqlalchemy import Table, MetaData, Column, Integer, NVARCHAR, create_engine, select
 
@@ -30,23 +29,6 @@ def create_my_engine():
     except Exception as e:
         print(e)
     return engine
-
-
-def create_df():
-    """ Creating DataFrame"""
-    clms = {
-        "Date_add": object,
-        "ver": np.int32,
-        "title": object,
-        "salary": object,
-        "firm": object,
-        "place": object,
-        "url": object,
-    }
-    df = pd.DataFrame([], columns=clms)
-    for k, v in clms.items():
-        df[k] = df[k].astype(v)
-    return df
 
 
 class DbPipeline(object):
@@ -75,7 +57,6 @@ class DbPipeline(object):
         self.today = strftime("%Y-%m-%d", gmtime())  # "yyyy-mm-dd"
         self.engine = create_my_engine()
         self.ver = self.obtain_ver()
-        self.df = create_df()
 
         self.data = []
 
@@ -83,9 +64,8 @@ class DbPipeline(object):
         logging.info("Flushing %s items..." % len(self.data))
 
         dff = pd.DataFrame(self.data)
-        df = pd.concat([self.df, dff], ignore_index=True, sort=False)  # merge dataframes
 
-        df.to_sql("hh_main", con=self.engine, if_exists="append")
+        dff.to_sql("hh_main", con=self.engine, if_exists="append")
 
         logging.info("%s items have been flushed" % len(self.data))
 
