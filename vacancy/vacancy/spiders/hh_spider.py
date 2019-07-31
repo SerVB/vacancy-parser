@@ -8,6 +8,13 @@ from scrapy.exporters import JsonItemExporter
 from scrapy.http.response import Response
 
 
+def or_empty(s: Optional[str]) -> str:
+    if s is None:
+        return ""
+
+    return s
+
+
 def clean_up_text(s: Optional[str]) -> Optional[str]:
     if s is None:
         return None
@@ -51,7 +58,8 @@ class HhSpider(Spider):
     scrapped = 0
 
     def closed(self, reason):
-        logging.warning("Примерно потеряно вакансий: %s" % (self.max_count - self.scrapped))
+        lost = self.max_count - self.scrapped
+        logging.warning("Примерно потеряно вакансий: %s (%s%%)" % (lost, lost * 100 // self.max_count))
 
     def start_requests(self) -> List[Request]:
         return [
@@ -60,6 +68,8 @@ class HhSpider(Spider):
                 callback=self.split_clusters_group,
                 meta={"split_by": frozenset((
                     "Регион",
+                    "Соседние города",
+                    "Метро",
                     "Профобласть",
                     "Специализация",
                     "Опыт работы",
@@ -73,6 +83,8 @@ class HhSpider(Spider):
             #     url=MOSCOW_WITH_SALARY,
             #     callback=self.split_clusters_group,
             #     meta={"split_by": frozenset((
+            #         "Соседние города",
+            #         "Метро",
             #         "Профобласть",
             #         "Специализация",
             #         "Опыт работы",
@@ -85,7 +97,7 @@ class HhSpider(Spider):
         ]
 
     def vacancy_count(self, response: Response) -> int:
-        vacancy_count_str = response.css(".header.HH-SearchVacancyDropClusters-Header::text").get()
+        vacancy_count_str = response.css("h1.header::text").get()
         vacancy_count_int = int("".join(filter(lambda c: c.isdigit(), vacancy_count_str)))
         self.max_count = max(self.max_count, vacancy_count_int)
         return vacancy_count_int
@@ -141,13 +153,16 @@ class HhSpider(Spider):
         description = clean_up_text("\n".join(response.css(".vacancy-section")[0]
                                               .css("*:not(style):not(script)::text").extract()))
 
-        self.scrapped += 1
-
-        yield {
+        item = {
             "title": clean_up_text(response.css(".vacancy-title h1.header::text").get()),
             "salary": clean_up_text(response.css("p.vacancy-salary::text").get()),
-            "firm": clean_up_text(response.css(".vacancy-company-name span::text").get()),
+            "firm": or_empty(clean_up_text(response.css(".vacancy-company-name span::text").get())) +
+                    or_empty(clean_up_text(response.css(".vacancy-company-name-wrapper span::text").get())),
             "place": response.meta["place"],
             "url": response.url,
             "description": description
         }
+
+        self.scrapped += 1
+
+        yield item
